@@ -1,12 +1,16 @@
-import { useState } from 'react';
-import reactLogo from './assets/react.svg';
 import './App.css';
 import BarChart from './BarChart';
+import Map from './Map';
 
 function App() {
   return (
     <div className='App'>
-      <BarChart />
+      <div>
+        <BarChart />
+      </div>
+      <div>
+        <Map />
+      </div>
     </div>
   );
 }
