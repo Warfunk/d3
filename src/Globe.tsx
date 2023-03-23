@@ -4,7 +4,7 @@ import * as d3 from 'd3';
 const Globe = () => {
   const [data, setData] = useState<any>();
   const [loading, setLoading] = useState(false);
-  const [rotate, setRotate] = useState<[number, number]>([0, 0])
+  const [rotate, setRotate] = useState<[number, number]>([0, -25])
   const svgRef = useRef<any>();
   const mapGroup = useRef<any>();
   const graticuleGroup = useRef<any>();
@@ -12,7 +12,7 @@ const Globe = () => {
   let graticule = d3.geoGraticule().step([10, 10]);
 
   useEffect(() => {
-    fetch('https://gist.githubusercontent.com/d3indepth/f28e1c3a99ea6d84986f35ac8646fac7/raw/c58cede8dab4673c91a3db702d50f7447b373d98/ne_110m_land.json')
+    fetch('https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_110m_admin_0_countries.geojson')
       .then(resp => resp.json())
       .then(d => {
         setData(d);
@@ -39,7 +39,7 @@ const Globe = () => {
         .attr('cx', 200)
         .attr('cy', 200)
         .attr("r", 200)
-        .attr('fill', 'lightBlue');
+        .attr('fill', '#00b7e4');
 
 
       mapGroup.current = svg
@@ -60,7 +60,9 @@ const Globe = () => {
                 enter
                   .append('path')
                   .attr('d', geoGenerator)
-                  .attr('fill', '#333333'),
+                  .attr('fill', '#333333')
+                  .attr('stroke', '#6a6a6a')
+                  .attr('stroke-width', '1px'),
               (update) => 
                 update
                   .transition()
@@ -85,7 +87,11 @@ const Globe = () => {
   }, [data, rotate])
 
   window.requestAnimationFrame(() => {
-    setRotate((current) => [current[0] + 0.2, current[1]])
+    setRotate((current) => {
+      const new1 = current[0] === 360 ? 0 : current[0] + 0.1;
+      const new2 = current[1];
+      return [new1, new2]
+    })
   })
 
   return loading ? ( 
