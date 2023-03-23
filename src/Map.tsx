@@ -32,8 +32,8 @@ const Map = () => {
         
             svg
                 .append('g')
-                .style("width", width)
-                .style("height", height)
+                .attr('width', width)
+                .attr('height', height)
 
             const myColor = d3.scaleSequential().domain([0, 100]).interpolator(d3.interpolateBuPu);
         
@@ -42,11 +42,15 @@ const Map = () => {
                 .join('path')
                 .attr('d', geoGenerator)
                 .attr('fill', (d: any) => {
-                    console.log('D', d)
                     return snowfallData && snowfallData[d.properties.name] 
                       ? myColor(snowfallData[d.properties.name]) 
                       : 'white' })
-                .attr('stroke', '#000');
+                .attr('stroke', '#000')
+                .attr('class', 'state')
+                .on('mousemove', (e) => {
+                    const dataPoint = d3.select(e.target).datum();
+                    console.log(dataPoint)
+                })
         });
     }, [snowfallData])
     return (
