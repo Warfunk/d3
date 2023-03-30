@@ -78,7 +78,7 @@ const BarChart = () => {
             .attr('height', 0)
             .attr('x', (d) => xScale.current(d.resort))
             .attr('y', yScale.current(0))
-            .attr('fill', '#5B8E7D')
+            .attr('fill', '#1E5690')
             .transition()
             .duration(500)
             .attr('height', (d) => height - yScale.current(d[display]))
@@ -102,7 +102,7 @@ const BarChart = () => {
   }, [display]);
   return (
     <>
-      <div style={{display: 'flex', justifyContent: 'flex-start', margin: 25}}>
+      <div className="barChartView">
         <button onClick={handleDisplayChange}>{`Change to ${displayOption}`}</button>
       </div>
       <svg ref={svgRef} />

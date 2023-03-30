@@ -1,16 +1,28 @@
+import { useState } from 'react';
 import './App.css';
 import BarChart from './BarChart';
 import Globe from './Globe';
 import Map from './Map';
 
 function App() {
+  const [currentView, setCurrentView] = useState<'globe' | 'snow' | 'bar'>('bar')
   return (
     <div className='App'>
-      {/* <div>
-        <BarChart />
-      </div> */}
+      <div className='viewButtons'>
+        <button onClick={() => setCurrentView('bar')}>Show Bar Chart</button>
+        <button onClick={() => setCurrentView('snow')}>Show Snow Map</button>
+        <button onClick={() => setCurrentView('globe')}>Show Globe</button>
+      </div>
       <div>
-        <Globe />
+        {currentView === 'bar' &&
+          <BarChart />
+        }
+        {currentView === 'snow' &&
+          <Map />
+        }
+        {currentView === 'globe' &&
+          <Globe />
+        }
       </div>
     </div>
   );

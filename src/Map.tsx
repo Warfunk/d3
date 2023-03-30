@@ -19,7 +19,7 @@ const Map = () => {
 
     useEffect(() => {
         d3.json('https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_110m_admin_1_states_provinces_lakes.geojson').then(function(data: any) {
-            let width = 400, height = 400;
+            let width = 400, height = 300;
             let projection = d3.geoAlbersUsa().scale(1300).translate([487.5, 305]);
             projection.fitSize([width, height], data);
             let geoGenerator = d3.geoPath()
@@ -55,6 +55,7 @@ const Map = () => {
     }, [snowfallData])
     return (
         <>
+          <h2>Average annual snowfall</h2>
           <svg ref={svgRef} />
         </>
       );
