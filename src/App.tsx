@@ -9,9 +9,9 @@ function App() {
   return (
     <div className='App'>
       <div className='viewButtons'>
-        <button onClick={() => setCurrentView('bar')}>Show Bar Chart</button>
-        <button onClick={() => setCurrentView('snow')}>Show Snow Map</button>
-        <button onClick={() => setCurrentView('globe')}>Show Globe</button>
+        <button onClick={() => setCurrentView('bar')}>Resort Stats</button>
+        <button onClick={() => setCurrentView('snow')}>Average Snow Map</button>
+        <button onClick={() => setCurrentView('globe')}>Spinning Globe</button>
       </div>
       <div>
         {currentView === 'bar' &&
