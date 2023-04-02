@@ -14,8 +14,8 @@ const margin = {
   top: 20,
   bottom: 25,
   right: 25,
-  left: 45
-}
+  left: 45,
+};
 
 const BarChart = () => {
   const svgRef = useRef<any>();
@@ -35,13 +35,16 @@ const BarChart = () => {
     return display === 'inches' ? setDisplay('acres') : setDisplay('inches');
   }, [display]);
 
-  const displayOption = useMemo(() => (display === 'inches' ? 'acres' : 'inches'), [display]);
+  const displayOption = useMemo(
+    () => (display === 'inches' ? 'acres' : 'inches'),
+    [display]
+  );
 
   useEffect(() => {
     const svg = d3
       .select(svgRef.current)
       .attr('width', svgWidth)
-      .attr('height', svgHeight)
+      .attr('height', svgHeight);
 
     chartGroup.current = svg
       .append('g')
@@ -49,19 +52,17 @@ const BarChart = () => {
 
     xScale.current = d3.scaleBand().range([0, width]).padding(0.25);
 
+    yScale.current = d3.scaleLinear().range([height, 0]);
 
-    yScale.current = d3
-      .scaleLinear()
-      .range([height, 0]);
-    
     yAxisDraw.current = chartGroup.current.append('g');
-    xAxisDraw.current = chartGroup.current.append('g').attr('transform', `translate(0, ${height})`);
+    xAxisDraw.current = chartGroup.current
+      .append('g')
+      .attr('transform', `translate(0, ${height})`);
     xScale.current.domain(dataSet.map((d) => d.resort));
     const xAxis = d3.axisBottom(xScale.current);
-    xAxisDraw.current.call(xAxis.scale(xScale.current));  
+    xAxisDraw.current.call(xAxis.scale(xScale.current));
+  }, []);
 
-  }, [])
-    
   useEffect(() => {
     yScale.current.domain([0, d3.max(dataSet.map((d) => d[display]))]);
     const yAxis = d3.axisLeft(yScale.current).ticks(5);
@@ -70,7 +71,7 @@ const BarChart = () => {
       .selectAll('.bar')
       .data(dataSet, (d) => d.resort)
       .join(
-        (enter) => 
+        (enter) =>
           enter
             .append('rect')
             .attr('class', 'bar')
@@ -83,27 +84,31 @@ const BarChart = () => {
             .duration(500)
             .attr('height', (d) => height - yScale.current(d[display]))
             .attr('y', (d) => yScale.current(d[display])),
-        (update) => 
+        (update) =>
           update
             .transition()
             .duration(500)
             .attr('height', (d) => height - yScale.current(d[display]))
             .attr('y', (d) => yScale.current(d[display])),
-        (exit) => 
+        (exit) =>
           exit
             .transition()
             .duration(500)
             .attr('height', 0)
             .attr('y', yScale.current(0))
             .remove()
-    );
-    yAxisDraw.current.transition().duration(500).call(yAxis.scale(yScale.current));
-
+      );
+    yAxisDraw.current
+      .transition()
+      .duration(500)
+      .call(yAxis.scale(yScale.current));
   }, [display]);
   return (
     <>
-      <div className="barChartView">
-        <button onClick={handleDisplayChange}>{`Change to ${displayOption}`}</button>
+      <div className='barChartView'>
+        <button
+          onClick={handleDisplayChange}
+        >{`Change to ${displayOption}`}</button>
       </div>
       <svg ref={svgRef} />
     </>

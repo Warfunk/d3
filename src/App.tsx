@@ -5,7 +5,9 @@ import Globe from './Globe';
 import Map from './Map';
 
 function App() {
-  const [currentView, setCurrentView] = useState<'globe' | 'snow' | 'bar'>('bar')
+  const [currentView, setCurrentView] = useState<'globe' | 'snow' | 'bar'>(
+    'bar'
+  );
   return (
     <div className='App'>
       <div className='viewButtons'>
@@ -14,15 +16,9 @@ function App() {
         <button onClick={() => setCurrentView('globe')}>Spinning Globe</button>
       </div>
       <div>
-        {currentView === 'bar' &&
-          <BarChart />
-        }
-        {currentView === 'snow' &&
-          <Map />
-        }
-        {currentView === 'globe' &&
-          <Globe />
-        }
+        {currentView === 'bar' && <BarChart />}
+        {currentView === 'snow' && <Map />}
+        {currentView === 'globe' && <Globe />}
       </div>
     </div>
   );
