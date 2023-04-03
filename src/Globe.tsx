@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
+
+const sensitivity = 75
 const Globe = () => {
   const [data, setData] = useState<any>();
   const [loading, setLoading] = useState(true);
@@ -9,8 +11,9 @@ const Globe = () => {
   const graticuleGroup = useRef<any>();
   const projection = useRef<any>();
   let graticule = d3.geoGraticule().step([10, 10]);
-  let width = 400,
-    height = 400;
+  const width = 400;
+  const height = 400;
+
   useEffect(() => {
     fetch(
       'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_110m_admin_0_countries.geojson'
@@ -21,12 +24,28 @@ const Globe = () => {
         setLoading(false);
       });
   }, []);
+
   useEffect(() => {
     if (!data) return;
+
+    const dragstarted = (e) => null
+    
+
+    const dragged = (e) =>{
+      const k = sensitivity / projection.current.scale()
+      setRotate((current) => [current[0] + e.dx * k, current[1] - e.dy * k]);
+    };
+
+    const  drag = d3.drag()
+      .on("start", dragstarted)
+      .on("drag", dragged);
+
     const svg = d3
       .select(svgRef.current)
       .attr('width', width)
-      .attr('height', height);
+      .attr('height', height)
+      .attr('cursor', 'pointer')
+      .call(drag);
 
     svg
       .append('circle')
