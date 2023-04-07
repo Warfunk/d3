@@ -12,8 +12,8 @@ function App() {
     <div className='App'>
       <div className='viewButtons'>
         <button onClick={() => setCurrentView('bar')}>Resort Stats</button>
-        <button onClick={() => setCurrentView('snow')}>Average Snow Map</button>
-        <button onClick={() => setCurrentView('globe')}>Spinning Globe</button>
+        <button onClick={() => setCurrentView('snow')}>Yearly Snow</button>
+        <button onClick={() => setCurrentView('globe')}>Globe</button>
       </div>
       <div>
         {currentView === 'bar' && <BarChart />}
