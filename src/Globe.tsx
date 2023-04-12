@@ -1,11 +1,17 @@
 import { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 
+const invertX = (y, rotation, height) => {
+  const adjustedY = y * 180 / height;
+  const yFromCenter = adjustedY > 90 ? adjustedY - 90 : -(90 - adjustedY);
+  return Math.abs(yFromCenter + rotation) > 90 && Math.abs(yFromCenter + rotation) < 270;
+} 
+
 const sensitivity = 75
 const Globe = () => {
   const [data, setData] = useState<any>();
   const [loading, setLoading] = useState(true);
-  const [rotate, setRotate] = useState<[number, number]>([0, -25]);
+  const [rotate, setRotate] = useState<[number, number]>([0, 0]);
   const svgRef = useRef<any>();
   const mapGroup = useRef<any>();
   const graticuleGroup = useRef<any>();
@@ -33,7 +39,8 @@ const Globe = () => {
 
     const dragged = (e) =>{
       const k = sensitivity / projection.current.scale()
-      setRotate((current) => [current[0] + e.dx * k, current[1] - e.dy * k]);
+      const currentRotation = projection.current.rotate()[1] 
+      setRotate((current) => [invertX(e.y, currentRotation, height) ? current[0] - e.dx * k : current[0] + e.dx * k , current[1] - e.dy * k]);
     };
 
     const  drag = d3.drag()

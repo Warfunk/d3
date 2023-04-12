@@ -36,7 +36,7 @@ const BarChart = () => {
   }, [display]);
 
   const displayOption = useMemo(
-    () => (display === 'inches' ? 'acres' : 'inches'),
+    () => (display === 'inches' ? 'acres' : 'snowfall'),
     [display]
   );
 
@@ -106,6 +106,7 @@ const BarChart = () => {
   return (
     <>
       <div className='barChartView'>
+        {display === 'acres' ? <h2>Skiable Acres</h2> : <h2>Average Snowfall</h2>}
         <button
           onClick={handleDisplayChange}
         >{`Change to ${displayOption}`}</button>

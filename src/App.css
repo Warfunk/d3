@@ -18,9 +18,16 @@
 
 .barChartView {
   display: flex;
-  justify-content: center;
+  justify-content: space-evenly;
+  align-items: center;
+}
+
+.barChartView  h2 {
+  color: #333;
+  flex: 1;
 }
 
 .barChartView  button {
-  width: 65%;
+  height: 40px;
+  flex: .5;
 }
