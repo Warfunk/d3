@@ -1,11 +1,20 @@
 import { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 
-const invertX = (y, rotation, height) => {
-  const adjustedY = y * 180 / height;
-  const yFromCenter = adjustedY > 90 ? adjustedY - 90 : -(90 - adjustedY);
-  return Math.abs(yFromCenter + rotation) > 90 && Math.abs(yFromCenter + rotation) < 270;
-} 
+const resortCoordinates = {
+  features: [
+    { 
+      geometry: {
+        type: "Point",
+        coordinates: [-106.3550, 39.6061]
+      },
+      properties: {
+        resort: 'Vail'
+      },
+      type: "Feature"
+    }
+  ] 
+};
 
 const sensitivity = 75
 const Globe = () => {
@@ -15,6 +24,7 @@ const Globe = () => {
   const svgRef = useRef<any>();
   const mapGroup = useRef<any>();
   const graticuleGroup = useRef<any>();
+  const resortGroup = useRef<any>();
   const projection = useRef<any>();
   let graticule = d3.geoGraticule().step([10, 10]);
   const width = 400;
@@ -33,14 +43,12 @@ const Globe = () => {
 
   useEffect(() => {
     if (!data) return;
-
     const dragstarted = (e) => null
     
 
     const dragged = (e) =>{
       const k = sensitivity / projection.current.scale()
-      const currentRotation = projection.current.rotate()[1] 
-      setRotate((current) => [invertX(e.y, currentRotation, height) ? current[0] - e.dx * k : current[0] + e.dx * k , current[1] - e.dy * k]);
+      setRotate((current) => [current[0] + e.dx * k , current[1] - e.dy * k]);
     };
 
     const  drag = d3.drag()
@@ -70,6 +78,12 @@ const Globe = () => {
     graticuleGroup.current = svg
       .append('g')
       .attr('class', 'geo')
+      .attr('width', width)
+      .attr('height', height);
+
+    resortGroup.current = svg
+      .append('g')
+      .attr('class', 'resorts')
       .attr('width', width)
       .attr('height', height);
   }, [data]);
@@ -111,6 +125,26 @@ const Globe = () => {
             .attr('fill-opacity', 0),
         (update) => update.attr('d', geoGenerator),
         (exit) => exit.remove()
+      );
+
+    resortGroup.current
+      .selectAll('.resort')
+      .data(resortCoordinates.features)
+      .join(
+        (enter) =>
+          enter
+            .append('circle')
+            .attr('class', 'resort')
+            .attr('r', 5)
+            .attr('cx', d => projection.current(d.geometry.coordinates)[0])
+            .attr('cy', d => projection.current(d.geometry.coordinates)[1])
+            .attr('fill', 'red')
+            .on('mouseenter', (_d, i) => console.log(i)),
+        (update) => 
+          update
+            .attr('d', geoGenerator)
+            .attr('cx', d => projection.current(d.geometry.coordinates)[0])
+            .attr('cy', d => projection.current(d.geometry.coordinates)[1])
       );
   }, [data, rotate]);
 
