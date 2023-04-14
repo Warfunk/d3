@@ -136,15 +136,39 @@ const Globe = () => {
             .append('circle')
             .attr('class', 'resort')
             .attr('r', 5)
-            .attr('cx', d => projection.current(d.geometry.coordinates)[0])
-            .attr('cy', d => projection.current(d.geometry.coordinates)[1])
+            .attr('cx', d => {
+              const currentXRotation = - projection.current.rotate()[0];
+              const long = d.geometry.coordinates[0];
+              const scaledRotation = Math.abs(currentXRotation) > 180 ? - (360 - currentXRotation) : currentXRotation
+              const xValue: number = projection.current(d.geometry.coordinates)[0];
+              return Math.abs(scaledRotation - long) < 90 ? xValue : -100;
+            })
+            .attr('cy', d => {
+              const currentYRotation = - projection.current.rotate()[1];
+              const long = d.geometry.coordinates[1];
+              const scaledRotation = Math.abs(currentYRotation) > 180 ? - (360 - currentYRotation) : currentYRotation
+              const yValue: number = projection.current(d.geometry.coordinates)[1];
+              return Math.abs(scaledRotation - long) < 90 ? yValue : -100;
+            })
             .attr('fill', 'red')
             .on('mouseenter', (_d, i) => console.log(i)),
         (update) => 
           update
             .attr('d', geoGenerator)
-            .attr('cx', d => projection.current(d.geometry.coordinates)[0])
-            .attr('cy', d => projection.current(d.geometry.coordinates)[1])
+            .attr('cx', d => {
+              const currentXRotation = - projection.current.rotate()[0];
+              const long = d.geometry.coordinates[0];
+              const scaledRotation = Math.abs(currentXRotation) > 180 ? - (360 - currentXRotation) : currentXRotation
+              const xValue: number = projection.current(d.geometry.coordinates)[0];
+              return Math.abs(scaledRotation - long) < 90 ? xValue : -100;
+            })
+            .attr('cy', d => {
+              const currentYRotation = - projection.current.rotate()[1];
+              const long = d.geometry.coordinates[1];
+              const scaledRotation = Math.abs(currentYRotation) > 180 ? - (360 - currentYRotation) : currentYRotation
+              const yValue: number = projection.current(d.geometry.coordinates)[1];
+              return Math.abs(scaledRotation - long) < 90 ? yValue : -100;
+            })
       );
   }, [data, rotate]);
 
