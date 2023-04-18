@@ -49,7 +49,6 @@ const Globe = () => {
     const dragged = (e) =>{
       const k = sensitivity / projection.current.scale()
       setRotate((current) => {
-        console.log(current[1] - e.dy * k)
         const updatedX = current[0] + e.dx * k;
         const updatedY = Math.abs(current[1] - e.dy * k) > 20 ? current[1] : current[1] - e.dy * k;
         return [ updatedX, updatedY]
