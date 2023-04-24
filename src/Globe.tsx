@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { HtmlHTMLAttributes, useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 
 const resortCoordinates = {
@@ -9,30 +9,122 @@ const resortCoordinates = {
         coordinates: [-106.3550, 39.6061]
       },
       properties: {
-        resort: 'Vail'
+        resort: 'Vail',
+        acres: 5317,
+        averageSnowfall: 354
       },
       type: "Feature"
-    }
+    },
+    { 
+      geometry: {
+        type: "Point",
+        coordinates: [-122.9486, 50.1150]
+      },
+      properties: {
+        resort: 'Whistler Blackcomb',
+        acres: 8171,
+        averageSnowfall: 448
+      },
+      type: "Feature"
+    },
+    { 
+      geometry: {
+        type: "Point",
+        coordinates: [-111.4980, 40.6461]
+      },
+      properties: {
+        resort: 'Park City',
+        acres: 7300,
+        averageSnowfall: 355
+      },
+      type: "Feature"
+    },
+    { 
+      geometry: {
+        type: "Point",
+        coordinates: [137.8619, 36.6982]
+      },
+      properties: {
+        resort: 'Hakuba Valley',
+        acres: 2372,
+        averageSnowfall: 433
+      },
+      type: "Feature"
+    },
+    { 
+      geometry: {
+        type: "Point",
+        coordinates: [148.4117, -36.4059]
+      },
+      properties: {
+        resort: 'Perisher',
+        acres: 3076,
+        averageSnowfall: 78
+      },
+      type: "Feature"
+    },
+    { 
+      geometry: {
+        type: "Point",
+        coordinates: [10.2682, 47.1296]
+      },
+      properties: {
+        resort: 'Ski Arlberg',
+        acres: 12350,
+        averageSnowfall: 276
+      },
+      type: "Feature"
+    },
+    { 
+      geometry: {
+        type: "Point",
+        coordinates: [-70.2917, -33.3403]
+      },
+      properties: {
+        resort: 'La Parva',
+        acres: 988,
+        averageSnowfall: 31
+      },
+      type: "Feature"
+    },
   ] 
 };
 
-const sensitivity = 75
+const Tooltip = ({children, className}: HtmlHTMLAttributes<HTMLDivElement>) => {
+  return (
+    <div className={className} style={{ background: 'white', position: 'absolute'}}>
+      {children}
+    </div>
+  )
+}
+
+const fadeIn = (el) => el.transition().duration(200).style('opacity', 1);
+const fadeOut = (el) => el.transition().duration(200).style('opacity', 0);
+
+const sensitivity = 75;
+const width = 400;
+const height = 400;
+
 const Globe = () => {
   const [data, setData] = useState<any>();
   const [loading, setLoading] = useState(true);
+  const [scale, setScale] = useState(200);
   const [rotate, setRotate] = useState<[number, number]>([0, 0]);
+
+  // Layers
   const svgRef = useRef<any>();
   const mapGroup = useRef<any>();
   const graticuleGroup = useRef<any>();
   const resortGroup = useRef<any>();
+  const oceansGroup = useRef<any>();
   const projection = useRef<any>();
-  let graticule = d3.geoGraticule().step([10, 10]);
-  const width = 400;
-  const height = 400;
+  // const tooltip = useRef<any>();
+
+  const graticule = d3.geoGraticule().step([10, 10]);
 
   useEffect(() => {
     fetch(
-      'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_110m_admin_0_countries.geojson'
+      'src/data/countries.json'
     )
       .then((resp) => resp.json())
       .then((d) => {
@@ -50,7 +142,7 @@ const Globe = () => {
       const k = sensitivity / projection.current.scale()
       setRotate((current) => {
         const updatedX = current[0] + e.dx * k;
-        const updatedY = Math.abs(current[1] - e.dy * k) > 20 ? current[1] : current[1] - e.dy * k;
+        const updatedY = Math.abs(current[1] - e.dy * k) > 45 ? current[1] : current[1] - e.dy * k;
         return [ updatedX, updatedY]
       });
     };
@@ -59,19 +151,23 @@ const Globe = () => {
       .on("start", dragstarted)
       .on("drag", dragged);
 
+    const zoom = d3.zoom().on('zoom', (e, i) => {
+      const k = e.transform.k
+      setScale(200 * k);
+    })
+
     const svg = d3
       .select(svgRef.current)
       .attr('width', width)
       .attr('height', height)
       .attr('cursor', 'pointer')
-      .call(drag);
+      .call(drag)
+      .call(zoom);
 
-    svg
-      .append('circle')
-      .attr('cx', 200)
-      .attr('cy', 200)
-      .attr('r', 200)
-      .attr('fill', '#00b7e4');
+    oceansGroup.current = svg
+      .append('g')
+      .attr('width', width)
+      .attr('height', height);
 
     mapGroup.current = svg
       .append('g')
@@ -97,8 +193,18 @@ const Globe = () => {
     projection.current = d3
       .geoOrthographic()
       .fitSize([width, height], data)
+      .scale(scale)
       .rotate(rotate);
-    let geoGenerator = d3.geoPath().projection(projection.current);
+    const geoGenerator = d3.geoPath().projection(projection.current).pointRadius(3);
+
+    d3.selectAll('.oceans').remove();
+    oceansGroup.current     
+      .append('circle')
+      .attr('class', 'oceans')
+      .attr('cx', 200)
+      .attr('cy', 200)
+      .attr('r', scale)
+      .attr('fill', '#00b7e4'); 
 
     mapGroup.current
       .selectAll('.path')
@@ -137,57 +243,57 @@ const Globe = () => {
       .join(
         (enter) =>
           enter
-            .append('circle')
+            .append('path')
             .attr('class', 'resort')
-            .attr('r', d => {
-              const currentXRotation = - projection.current.rotate()[0];
-              const long = d.geometry.coordinates[0];
-              const scaledRotation = Math.abs(currentXRotation) > 180 ? - (360 - currentXRotation) : currentXRotation
-              return Math.abs(scaledRotation - long) < 90 ? 3 : 0;
-            })
-            .attr('cx', d => {
-              const xValue: number = projection.current(d.geometry.coordinates)[0];
-              return xValue;
-            })
-            .attr('cy', d => {
-              const yValue: number = projection.current(d.geometry.coordinates)[1];
-              return yValue;
-            })
+            .attr('d', geoGenerator)
             .attr('fill', 'red')
-            .on('mouseenter', (_d, i) => console.log(i)),
+            .attr('cursor', 'pointer'),
         (update) => 
           update
             .attr('d', geoGenerator)
-            .attr('cx', d => {
-              const xValue: number = projection.current(d.geometry.coordinates)[0];
-              return xValue;
-            })
-            .attr('cy', d => {
-              const yValue: number = projection.current(d.geometry.coordinates)[1];
-              return yValue;
-            })
-            .attr('r', d => {
-              const currentXRotation = - projection.current.rotate()[0];
-              const long = d.geometry.coordinates[0];
-              const scaledRotation = Math.abs(currentXRotation) > 180 ? - (360 - currentXRotation) : currentXRotation
-              return Math.abs(scaledRotation - long) < 90 ? 3 : 0;
-            })
       );
-  }, [data, rotate]);
+  }, [data, rotate, scale]);
 
-  window.requestAnimationFrame(() => {
-    setRotate((current) => {
-      const new1 = current[0] === 360 ? 0 : current[0] + 0.1;
-      const new2 = current[1];
-      return [new1, new2];
-    });
-  });
+  useEffect(() => {
+    if (!data) return;
+    const tooltip = d3.select('.tooltip');
+    const handleMouseOver = (e, i) => {
+      const [x, y] = projection.current(i.geometry.coordinates);
+      tooltip
+        .style('left', `${x + 5}px`)
+        .style('top', `${y}px`)
+        .html(
+          `<p>${i.properties.resort}</p>`
+        )
+        .call(fadeIn);
+    };
+    const handleMouseLeave = () => {
+      tooltip
+        .style('left', -100)
+      tooltip.call(fadeOut);
+    };
+    resortGroup.current
+      .selectAll('.resort')
+      .on('mouseover', handleMouseOver)
+      .on('mouseleave', handleMouseLeave);
+  }, [data, scale, rotate]);
+
+  // window.requestAnimationFrame(() => {
+  //   setRotate((current) => {
+  //     const new1 = current[0] === 360 ? 0 : current[0] + 0.1;
+  //     const new2 = current[1];
+  //     return [new1, new2];
+  //   });
+  // });
   return loading ? (
     <h2>Loading...</h2>
   ) : (
-    <>
-      <svg ref={svgRef} />
-    </>
+    <div style={{ display: 'flex', justifyContent: 'center' }}>
+      <div style={{ height: height, position: 'relative', width: width}}>
+        <Tooltip className="tooltip" />
+        <svg ref={svgRef} />
+      </div>
+    </div>
   );
 };
 export default Globe;

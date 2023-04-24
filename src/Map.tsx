@@ -23,11 +23,11 @@ const Map = () => {
     d3.json(
       'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_110m_admin_1_states_provinces_lakes.geojson'
     ).then(function (data: any) {
-      let width = 400,
-        height = 300;
-      let projection = d3.geoAlbersUsa().scale(1300).translate([487.5, 305]);
+      const width = 400;
+      const height = 300;
+      const projection = d3.geoAlbersUsa() //.scale(1300).translate([487.5, 305]);
       projection.fitSize([width, height], data);
-      let geoGenerator = d3.geoPath().projection(projection);
+      const geoGenerator = d3.geoPath().projection(projection);
 
       const svg = d3
         .select(svgRef.current)
@@ -37,9 +37,14 @@ const Map = () => {
       svg.append('g').attr('width', width).attr('height', height);
 
       const myColor = d3
-        .scaleSequential()
+        .scaleLinear()
         .domain([0, 100])
-        .interpolator(d3.interpolateBuPu);
+        .range(['white', 'blue'])
+
+      // const myColor = d3
+      //   .scaleSequential()
+      //   .domain([0, 100])
+      //   .interpolator(d3.interpolateBuPu); 
 
       svg
         .append('g')
@@ -56,7 +61,6 @@ const Map = () => {
         .attr('class', 'state')
         .on('mousemove', (e) => {
           const dataPoint = d3.select(e.target).datum();
-          console.log(dataPoint);
         });
     });
   }, [snowfallData]);
