@@ -7,6 +7,9 @@ const fetchSnowData = async () => {
   return data;
 };
 
+const width = 400;
+const height = 300;
+
 const Map = () => {
   const [snowfallData, setSnowfallData] = useState();
   const svgRef = useRef<any>();
@@ -21,10 +24,8 @@ const Map = () => {
 
   useEffect(() => {
     d3.json(
-      'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_110m_admin_1_states_provinces_lakes.geojson'
+      'src/data/states.json'
     ).then(function (data: any) {
-      const width = 400;
-      const height = 300;
       const projection = d3.geoAlbersUsa() //.scale(1300).translate([487.5, 305]);
       projection.fitSize([width, height], data);
       const geoGenerator = d3.geoPath().projection(projection);
@@ -59,11 +60,9 @@ const Map = () => {
         })
         .attr('stroke', '#000')
         .attr('class', 'state')
-        .on('mousemove', (e) => {
-          const dataPoint = d3.select(e.target).datum();
-        });
     });
   }, [snowfallData]);
+
   return (
     <>
       <h2>Average annual snowfall</h2>

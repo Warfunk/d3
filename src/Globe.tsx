@@ -1,98 +1,11 @@
 import { HtmlHTMLAttributes, useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
-
-const resortCoordinates = {
-  features: [
-    { 
-      geometry: {
-        type: "Point",
-        coordinates: [-106.3550, 39.6061]
-      },
-      properties: {
-        resort: 'Vail',
-        acres: 5317,
-        averageSnowfall: 354
-      },
-      type: "Feature"
-    },
-    { 
-      geometry: {
-        type: "Point",
-        coordinates: [-122.9486, 50.1150]
-      },
-      properties: {
-        resort: 'Whistler Blackcomb',
-        acres: 8171,
-        averageSnowfall: 448
-      },
-      type: "Feature"
-    },
-    { 
-      geometry: {
-        type: "Point",
-        coordinates: [-111.4980, 40.6461]
-      },
-      properties: {
-        resort: 'Park City',
-        acres: 7300,
-        averageSnowfall: 355
-      },
-      type: "Feature"
-    },
-    { 
-      geometry: {
-        type: "Point",
-        coordinates: [137.8619, 36.6982]
-      },
-      properties: {
-        resort: 'Hakuba Valley',
-        acres: 2372,
-        averageSnowfall: 433
-      },
-      type: "Feature"
-    },
-    { 
-      geometry: {
-        type: "Point",
-        coordinates: [148.4117, -36.4059]
-      },
-      properties: {
-        resort: 'Perisher',
-        acres: 3076,
-        averageSnowfall: 78
-      },
-      type: "Feature"
-    },
-    { 
-      geometry: {
-        type: "Point",
-        coordinates: [10.2682, 47.1296]
-      },
-      properties: {
-        resort: 'Ski Arlberg',
-        acres: 12350,
-        averageSnowfall: 276
-      },
-      type: "Feature"
-    },
-    { 
-      geometry: {
-        type: "Point",
-        coordinates: [-70.2917, -33.3403]
-      },
-      properties: {
-        resort: 'La Parva',
-        acres: 988,
-        averageSnowfall: 31
-      },
-      type: "Feature"
-    },
-  ] 
-};
+import * as topojson from 'topojson-client';
+import resortCoordinates from './data/resort.js'
 
 const Tooltip = ({children, className}: HtmlHTMLAttributes<HTMLDivElement>) => {
   return (
-    <div className={className} style={{ background: 'white', position: 'absolute'}}>
+    <div className={className} style={{ background: 'white', position: 'absolute', borderRadius: 5, padding: 10}}>
       {children}
     </div>
   )
@@ -124,11 +37,11 @@ const Globe = () => {
 
   useEffect(() => {
     fetch(
-      'src/data/countries.json'
+      'src/data/topocountries.json'
     )
       .then((resp) => resp.json())
       .then((d) => {
-        setData(d);
+        setData(topojson.feature(d, d.objects.countries));
         setLoading(false);
       });
   }, []);
@@ -138,8 +51,8 @@ const Globe = () => {
     const dragstarted = (e) => null
     
 
-    const dragged = (e) =>{
-      const k = sensitivity / projection.current.scale()
+    const dragged = (e) => {
+      const k = sensitivity / projection.current.scale();
       setRotate((current) => {
         const updatedX = current[0] + e.dx * k;
         const updatedY = Math.abs(current[1] - e.dy * k) > 45 ? current[1] : current[1] - e.dy * k;
@@ -151,7 +64,7 @@ const Globe = () => {
       .on("start", dragstarted)
       .on("drag", dragged);
 
-    const zoom = d3.zoom().on('zoom', (e, i) => {
+    const zoom = d3.zoom().on('zoom', (e) => {
       const k = e.transform.k
       setScale(200 * k);
     })
@@ -263,7 +176,10 @@ const Globe = () => {
         .style('left', `${x + 5}px`)
         .style('top', `${y}px`)
         .html(
-          `<p>${i.properties.resort}</p>`
+          `<h5 class="resortName">${i.properties.resort}</h5>
+          <h6>Acreage: ${i.properties.acres}<h6>
+          <h6>Average Snow: ${i.properties.averageSnowfall}<h6>
+          `
         )
         .call(fadeIn);
     };
